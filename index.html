@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Para Ti ❤️</title>
+    <link href="https://fonts.googleapis.com/css2?family=Parisienne&family=Quicksand:wght@400;600&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --pink-bg: #fff5f7;
+            --heart-red: #ff4d6d;
+            --heart-pink: #ff8fa3;
+            --trunk-brown: #5d4037;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Corazones flotantes de fondo */
+        .floating-hearts {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .floating-heart {
+            position: absolute;
+            font-size: 20px;
+            opacity: 0.2;
+            animation: float 15s infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.2;
+            }
+            90% {
+                opacity: 0.2;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Pantalla Inicial */
+        #initialScreen {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, #ff6b9d 0%, #c44569 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            transition: opacity 1s, visibility 1s;
+        }
+
+        #initialScreen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .question {
+            font-family: 'Dancing Script', cursive;
+            font-size: 3rem;
+            color: white;
+            text-align: center;
+            margin-bottom: 3rem;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+            padding: 0 1rem;
+        }
+
+        .heart-btn {
+            width: 140px;
+            height: 140px;
+            background: white;
+            position: relative;
+            transform: rotate(-45deg);
+            cursor: pointer;
+            animation: pulse 1.5s infinite;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transition: transform 0.3s;
+        }
+
+        .heart-btn:hover {
+            transform: rotate(-45deg) scale(1.1);
+        }
+
+        .heart-btn::before, .heart-btn::after {
+            content: "";
+            width: 140px;
+            height: 140px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+        }
+
+        .heart-btn::before { top: -70px; left: 0; }
+        .heart-btn::after { left: 70px; top: 0; }
+        
+        .heart-btn span {
+            transform: rotate(45deg);
+            color: #c44569;
+            font-family: 'Dancing Script', cursive;
+            font-size: 2.5rem;
+            z-index: 10;
+            font-weight: 700;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: rotate(-45deg) scale(1); }
+            50% { transform: rotate(-45deg) scale(1.05); }
+        }
+
+        /* Tarjeta Principal */
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            width: 90%;
+            max-width: 500px;
+            border-radius: 40px;
+            padding: 40px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            text-align: center;
+            opacity: 0;
+            transform: scale(0.9);
+            transition: all 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 10;
+            backdrop-filter: blur(10px);
+            position: relative;
+        }
+
+        .card.visible { 
+            opacity: 1; 
+            transform: scale(1); 
+        }
+
+        .title { 
+            font-family: 'Parisienne', cursive; 
+            font-size: 3rem; 
+            color: var(--heart-red); 
+            margin-bottom: 20px;
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        .title.animate {
+            animation: fadeInDown 1s ease-out forwards;
+        }
+
+        @keyframes fadeInDown {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* EL ÁRBOL */
+        .tree-canvas {
+            position: relative;
+            width: 100%;
+            height: 320px;
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+        }
+
+        /* Corazón que cae */
+        .falling-initial-heart {
+            position: absolute;
+            top: -80px;
+            left: 50%;
+            transform: translateX(-50%) rotate(-45deg);
+            width: 40px;
+            height: 40px;
+            background: #ff4d6d;
+            opacity: 0;
+            z-index: 20;
+        }
+
+        .falling-initial-heart::before,
+        .falling-initial-heart::after {
+            content: "";
+            width: 40px;
+            height: 40px;
+            background: #ff4d6d;
+            border-radius: 50%;
+            position: absolute;
+        }
+
+        .falling-initial-heart::before { top: -20px; left: 0; }
+        .falling-initial-heart::after { left: 20px; top: 0; }
+
+        .falling-initial-heart.animate {
+            animation: fallToGround 2s ease-in forwards;
+        }
+
+        @keyframes fallToGround {
+            0% {
+                opacity: 1;
+                top: -80px;
+                transform: translateX(-50%) rotate(-45deg);
+            }
+            100% {
+                opacity: 1;
+                top: 280px;
+                transform: translateX(-50%) rotate(135deg);
+            }
+        }
+
+        /* Tronco */
+        .trunk {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 18px;
+            height: 0;
+            background: linear-gradient(to right, #5d4037, #3e2723);
+            transform: translateX(-50%);
+            border-radius: 10px;
+            transition: height 1.5s ease-out;
+            z-index: 5;
+        }
+
+        .trunk.grow {
+            height: 150px;
+        }
+
+        /* Ramas */
+        .branches {
+            position: absolute;
+            bottom: 150px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            height: 200px;
+            opacity: 0;
+            z-index: 3;
+        }
+
+        .branches.show {
+            animation: fadeIn 1s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        .branch {
+            position: absolute;
+            background: linear-gradient(to top, #5d4037, #3e2723);
+            border-radius: 5px;
+            transform-origin: bottom center;
+        }
+
+        .branch1 { width: 10px; height: 80px; left: 145px; bottom: 0; transform: rotate(-35deg); }
+        .branch2 { width: 10px; height: 80px; left: 145px; bottom: 0; transform: rotate(35deg); }
+        .branch3 { width: 8px; height: 90px; left: 146px; bottom: 40px; transform: rotate(-50deg); }
+        .branch4 { width: 8px; height: 90px; left: 146px; bottom: 40px; transform: rotate(50deg); }
+        .branch5 { width: 8px; height: 70px; left: 146px; bottom: 80px; transform: rotate(-30deg); }
+        .branch6 { width: 8px; height: 70px; left: 146px; bottom: 80px; transform: rotate(30deg); }
+
+        /* Corazones de la copa del árbol - Estilo limpio de Gemini */
+        #treePetals {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 12;
+        }
+
+        .heart-petal {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            transform: rotate(-45deg) scale(0);
+            opacity: 0;
+            z-index: 10;
+        }
+
+        .heart-petal::before, 
+        .heart-petal::after {
+            content: "";
+            width: 16px;
+            height: 16px;
+            background: inherit;
+            border-radius: 50%;
+            position: absolute;
+        }
+
+        .heart-petal::before { top: -8px; left: 0; }
+        .heart-petal::after { left: 8px; top: 0; }
+
+        .heart-petal.bloom { 
+            animation: bloomAnim 0.7s forwards cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+        }
+
+        @keyframes bloomAnim {
+            to { 
+                transform: rotate(-45deg) scale(1); 
+                opacity: 0.95; 
+            }
+        }
+
+        /* Lluvia de pétalos */
+        .falling-petal {
+            position: fixed;
+            width: 14px;
+            height: 14px;
+            pointer-events: none;
+            z-index: 1000;
+            transform: rotate(-45deg);
+            opacity: 0.7;
+        }
+
+        .falling-petal::before,
+        .falling-petal::after {
+            content: "";
+            width: 14px;
+            height: 14px;
+            background: inherit;
+            border-radius: 50%;
+            position: absolute;
+        }
+
+        .falling-petal::before { top: -7px; left: 0; }
+        .falling-petal::after { left: 7px; top: 0; }
+
+        .falling-petal.animate-fall {
+            animation: petalFall linear forwards;
+        }
+
+        @keyframes petalFall {
+            to { 
+                transform: translateY(110vh) rotate(405deg); 
+                opacity: 0; 
+            }
+        }
+
+        /* Textos y Contador */
+        .message { 
+            font-size: 1.15rem; 
+            color: #444; 
+            margin: 25px 0; 
+            line-height: 1.7;
+            opacity: 0;
+        }
+
+        .message.animate {
+            animation: fadeInUp 1s ease-out forwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .counter-box { 
+            background: linear-gradient(135deg, #fff0f3 0%, #ffe8ed 100%);
+            padding: 25px; 
+            border-radius: 25px; 
+            margin: 20px 0; 
+            border: 2px dashed var(--heart-red);
+            opacity: 0;
+            box-shadow: 0 5px 15px rgba(255, 77, 109, 0.1);
+        }
+
+        .counter-box.animate {
+            animation: fadeInUp 1s ease-out forwards;
+        }
+
+        .counter-label {
+            font-size: 0.95rem; 
+            color: #888; 
+            margin-bottom: 10px;
+        }
+
+        #timer { 
+            font-weight: 700; 
+            color: var(--heart-red); 
+            font-size: 1.3rem;
+            font-family: 'Dancing Script', cursive;
+        }
+
+        .love-msg { 
+            font-family: 'Dancing Script', cursive; 
+            font-size: 2.8rem; 
+            color: var(--heart-red); 
+            animation: heartbeat 1.5s infinite;
+            opacity: 0;
+            margin-top: 15px;
+        }
+
+        .love-msg.animate {
+            animation: heartbeat 1.5s infinite, fadeInUp 1s ease-out forwards;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            10%, 30% { transform: scale(1.1); }
+            20%, 40% { transform: scale(1); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .question { font-size: 2.2rem; }
+            .heart-btn { width: 120px; height: 120px; }
+            .heart-btn::before, .heart-btn::after { width: 120px; height: 120px; }
+            .heart-btn::before { top: -60px; }
+            .heart-btn::after { left: 60px; }
+            .heart-btn span { font-size: 2rem; }
+            .card { padding: 30px 25px; max-width: 95%; }
+            .title { font-size: 2.5rem; }
+            .tree-canvas { height: 300px; }
+            .message { font-size: 1.05rem; }
+            .love-msg { font-size: 2.3rem; }
+            
+            /* Ajustar posición de corazones en móvil para cubrir ramas */
+            .branches {
+                bottom: 140px;
+            }
+            
+            .trunk.grow {
+                height: 140px;
+            }
+            
+            /* Los corazones deben estar más arriba y más densos */
+            #treePetals {
+                transform: translateY(-15px);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Corazones flotantes de fondo -->
+    <div class="floating-hearts" id="floatingHearts"></div>
+
+    <!-- Pantalla Inicial -->
+    <div id="initialScreen">
+        <h2 class="question">¿Quieres ser mi San Valentín?</h2>
+        <div class="heart-btn" onclick="startExperience()">
+            <span>SÍ</span>
+        </div>
+    </div>
+
+    <!-- Tarjeta Principal -->
+    <div class="card" id="mainCard">
+        <div class="title" id="title">Ismael ❤️ Sofía</div>
+        
+        <div class="tree-canvas" id="treeCanvas">
+            <!-- Corazón que cae -->
+            <div class="falling-initial-heart" id="fallingHeart"></div>
+            
+            <!-- Tronco -->
+            <div class="trunk" id="mainTrunk"></div>
+            
+            <!-- Ramas -->
+            <div class="branches" id="branches">
+                <div class="branch branch1"></div>
+                <div class="branch branch2"></div>
+                <div class="branch branch3"></div>
+                <div class="branch branch4"></div>
+                <div class="branch branch5"></div>
+                <div class="branch branch6"></div>
+            </div>
+
+            <!-- Contenedor de pétalos del árbol -->
+            <div id="treePetals"></div>
+        </div>
+
+        <div class="message" id="message">
+            <p><strong>Para el amor de mi vida:</strong></p>
+            <p>Si pudiera elegir un lugar seguro, sería a tu lado. Cuanto más tiempo estoy contigo, más te amo.</p>
+        </div>
+
+        <div class="counter-box" id="counterBox">
+            <p class="counter-label">Mi amor por ti comenzó hace...</p>
+            <div id="timer">Calculando...</div>
+        </div>
+
+        <div class="love-msg" id="loveMsg">I Love You!</div>
+    </div>
+
+    <script>
+        // Crear corazones flotantes de fondo
+        function createFloatingHearts() {
+            const container = document.getElementById('floatingHearts');
+            for (let i = 0; i < 15; i++) {
+                const heart = document.createElement('div');
+                heart.className = 'floating-heart';
+                heart.innerHTML = '💕';
+                heart.style.left = Math.random() * 100 + '%';
+                heart.style.animationDelay = Math.random() * 15 + 's';
+                heart.style.animationDuration = (15 + Math.random() * 10) + 's';
+                container.appendChild(heart);
+            }
+        }
+
+        createFloatingHearts();
+
+        // Iniciar experiencia
+        function startExperience() {
+            document.getElementById('initialScreen').classList.add('hidden');
+            
+            setTimeout(() => {
+                document.getElementById('mainCard').classList.add('visible');
+                startTreeAnimation();
+            }, 1000);
+        }
+
+        // Animación del árbol
+        function startTreeAnimation() {
+            // 1. Mostrar título
+            setTimeout(() => {
+                document.getElementById('title').classList.add('animate');
+            }, 300);
+
+            // 2. Corazón cayendo
+            setTimeout(() => {
+                document.getElementById('fallingHeart').classList.add('animate');
+            }, 800);
+
+            // 3. Crecer tronco
+            setTimeout(() => {
+                document.getElementById('mainTrunk').classList.add('grow');
+            }, 2800);
+
+            // 4. Mostrar ramas
+            setTimeout(() => {
+                document.getElementById('branches').classList.add('show');
+            }, 4200);
+
+            // 5. Florecer corazones
+            setTimeout(() => {
+                bloomHearts();
+            }, 5000);
+
+            // 6. Mostrar mensaje
+            setTimeout(() => {
+                document.getElementById('message').classList.add('animate');
+            }, 9000);
+
+            // 7. Mostrar contador
+            setTimeout(() => {
+                document.getElementById('counterBox').classList.add('animate');
+            }, 10000);
+
+            // 8. Mostrar "I Love You" y empezar lluvia
+            setTimeout(() => {
+                document.getElementById('loveMsg').classList.add('animate');
+                startPetalRain();
+            }, 11000);
+        }
+
+        // Crear corazones en el árbol - Algoritmo mejorado
+        function bloomHearts() {
+            const canvas = document.getElementById('treeCanvas');
+            const container = document.getElementById('treePetals');
+            const colors = ['#ff4d6d', '#ff758f', '#ff8fa3', '#c9184a', '#ffb3c1', '#ff6b9d'];
+            
+            // Detectar si es móvil para ajustar posición
+            const isMobile = window.innerWidth <= 768;
+            const yOffset = isMobile ? -8 : 0; // Subir corazones en móvil
+            
+            // Crear forma de corazón densa con distribución radial
+            const totalPetals = 280;
+            let petalIndex = 0;
+
+            // Crear múltiples capas para densidad
+            for (let layer = 0; layer < 6; layer++) {
+                const petalsInLayer = Math.floor(totalPetals / 6);
+                const baseRadius = 45 + layer * 15;
+                
+                for (let i = 0; i < petalsInLayer; i++) {
+                    setTimeout(() => {
+                        const petal = document.createElement('div');
+                        petal.className = 'heart-petal';
+                        
+                        // Distribución en forma de corazón
+                        const angle = (i / petalsInLayer) * Math.PI * 2;
+                        const t = angle;
+                        
+                        // Ecuación paramétrica de corazón
+                        const heartX = 16 * Math.pow(Math.sin(t), 3);
+                        const heartY = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+                        
+                        // Escalar y posicionar
+                        const scale = (baseRadius / 50) + (Math.random() * 0.3);
+                        const x = 50 + (heartX * scale * 1.2);
+                        const y = 25 + (heartY * scale * 0.8) + layer * 3 + yOffset;
+                        
+                        petal.style.left = x + '%';
+                        petal.style.top = y + '%';
+                        petal.style.background = colors[Math.floor(Math.random() * colors.length)];
+                        
+                        container.appendChild(petal);
+                        
+                        // Animar con delay
+                        setTimeout(() => {
+                            petal.classList.add('bloom');
+                        }, 50);
+                        
+                    }, petalIndex * 12);
+                    
+                    petalIndex++;
+                }
+            }
+            
+            // Agregar pétalos aleatorios para llenar espacios
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const petal = document.createElement('div');
+                    petal.className = 'heart-petal';
+                    
+                    const randomX = 50 + (Math.random() - 0.5) * 70;
+                    const randomY = 30 + (Math.random() - 0.5) * 50 + yOffset;
+                    
+                    petal.style.left = randomX + '%';
+                    petal.style.top = randomY + '%';
+                    petal.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    
+                    container.appendChild(petal);
+                    
+                    setTimeout(() => {
+                        petal.classList.add('bloom');
+                    }, 50);
+                    
+                }, petalIndex * 12);
+                
+                petalIndex++;
+            }
+            
+            // Agregar corazones extra en la parte superior para cubrir ramas (especialmente en móvil)
+            for (let i = 0; i < 40; i++) {
+                setTimeout(() => {
+                    const petal = document.createElement('div');
+                    petal.className = 'heart-petal';
+                    
+                    // Enfocar en la parte superior donde están las ramas
+                    const randomX = 50 + (Math.random() - 0.5) * 60;
+                    const randomY = 15 + Math.random() * 25 + yOffset; // Parte superior
+                    
+                    petal.style.left = randomX + '%';
+                    petal.style.top = randomY + '%';
+                    petal.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    petal.style.zIndex = '15'; // Asegurar que estén encima de las ramas
+                    
+                    container.appendChild(petal);
+                    
+                    setTimeout(() => {
+                        petal.classList.add('bloom');
+                    }, 50);
+                    
+                }, petalIndex * 12);
+                
+                petalIndex++;
+            }
+        }
+
+        // Lluvia de pétalos constante
+        function startPetalRain() {
+            const colors = ['#ff4d6d', '#ff758f', '#ff8fa3', '#c9184a', '#ffb3c1'];
+            
+            setInterval(() => {
+                const petal = document.createElement('div');
+                petal.className = 'falling-petal';
+                petal.style.background = colors[Math.floor(Math.random() * colors.length)];
+                petal.style.left = Math.random() * 100 + 'vw';
+                petal.style.top = '-20px';
+                
+                const duration = 5 + Math.random() * 4;
+                petal.style.animationDuration = duration + 's';
+                
+                document.body.appendChild(petal);
+                petal.classList.add('animate-fall');
+                
+                // Limpiar después de caer
+                setTimeout(() => {
+                    petal.remove();
+                }, duration * 1000);
+            }, 250);
+        }
+
+        // Contador en tiempo real
+        const startDate = new Date('2023-11-15T00:00:00');
+
+        function updateTimer() {
+            const now = new Date();
+            const diff = now - startDate;
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            document.getElementById('timer').textContent = 
+                `${days}d ${hours}h ${minutes}m ${seconds}s`;
+        }
+
+        setInterval(updateTimer, 1000);
+        updateTimer();
+    </script>
+</body>
+</html>
